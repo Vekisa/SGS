@@ -66,6 +66,7 @@ public class ResursiDAO {
 	void ucitajResurse(ArrayList<Integer> lista) {
 		for(Integer i : lista) {
 			//TREBA UCITATI POSEBNO SVAKI FOLDER KOMPANIJE, KAO I SADRZAJ UNUTAR SVAKOG
+			//SAMO DA SE PROMENI
 		}
 	}
 
