@@ -12,6 +12,11 @@ public class Popularnost {
 		this.brojPoseta = brojPoseta;
 		this.procenatPopularnosti = procenatPopularnosti;
 	}
+	
+	@Override
+	public String toString() { 
+	    return brojPoseta + ", " + procenatPopularnosti;
+	} 
 
 	public int getBrojPoseta() {
 		return brojPoseta;

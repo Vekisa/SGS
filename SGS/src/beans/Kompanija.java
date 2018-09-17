@@ -23,6 +23,7 @@ public class Kompanija {
 		this.email = email;
 		this.artikli = new HashMap<Integer,Artikal>();
 	}
+	
 
 	public String getNaziv() {
 		return naziv;

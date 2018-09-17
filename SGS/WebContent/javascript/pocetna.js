@@ -1,4 +1,11 @@
 $(document).on("click","#btn",function(){
 	var text = $('#inp').val();
-	alert(text);
+	
+	$.ajax({
+		type: "POST",
+		url: "rest/osnovniServis/proba?text="+text,
+		success:function(data){
+			alert("POSLAO!");
+		}
+	});
 });

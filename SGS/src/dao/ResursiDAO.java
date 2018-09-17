@@ -1,9 +1,32 @@
 package dao;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 
+import beans.Adresa;
+import beans.Artikal;
+import beans.Artikal.Tip;
 import beans.Kompanija;
+import beans.Popularnost;
+
+/*details.txt za kompaniju treba da izgleda:
+ * naziv
+ * adresa.mesto
+ * adresa.ulica
+ * adresa.broj
+ * email
+ * popularnost.brojPoseta
+ * popularnost.procenatPopularnosti
+ */
+
+/*details.txt za artikal
+ * naziv
+ * cena
+ * tip
+ */
 
 public class ResursiDAO {
 	
@@ -53,6 +76,8 @@ public class ResursiDAO {
 		
 		pomKomp.setId(id);
 		
+		kompanije.put(pomKomp.getId(), pomKomp);
+		
 		File[] listaArtikala = fKompanija.listFiles();
 		
 		for(File f : listaArtikala) {
@@ -79,12 +104,172 @@ public class ResursiDAO {
 	}
 	
 	private void ucitajDetaljeKompanije(Integer id,File f) {
-		//UCITATI DETALJE 
+
+		Kompanija k = kompanije.get(id);
 		
+		if(k == null)
+			return;
+		
+		int brojac = 0;
+		String[] ucitani = new String[7];
+		Integer pomBr = -1;
+		double pomBrD = -1;
+		
+		try {
+			FileInputStream fstream = new FileInputStream(f.getPath());
+			BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+			String strLine;
+			
+			while ((strLine = br.readLine()) != null && brojac < 8)   {
+			  strLine = strLine.trim();
+			  ucitani[brojac] = strLine;
+			  ++brojac;
+			}
+			
+			br.close();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		k.setNaziv(ucitani[0]);
+		
+		try {
+			pomBr = Integer.parseInt(ucitani[3]);
+		}catch(Exception e) {
+			e.printStackTrace();
+			System.out.println("Broj adrese ne moze da se parsira!");
+		}
+		
+		k.setAdresa(new Adresa(ucitani[1],ucitani[2],pomBr));
+		k.setEmail(ucitani[4]);
+		
+		try {
+			pomBr = Integer.parseInt(ucitani[5]);
+			pomBrD = Double.parseDouble(ucitani[6]);
+		}catch(Exception e) {
+			e.printStackTrace();
+			System.out.println("Popularnost ne moze da se parsira!");
+		}
+		
+		k.setPopularnost(new Popularnost(pomBr,pomBrD));
+	}
+	
+	private void ucitajArtikal(Integer id,File fArtikal) {
+
+		Kompanija k = kompanije.get(id);
+		if(k == null) {
+			System.out.println("Lose poslata kompanija!");
+			return;
+		}
+		
+		File[] artikalList = fArtikal.listFiles();
+		
+		Integer idPom;
+		
+		try {
+			idPom = Integer.parseInt(fArtikal.getName());
+		}catch(Exception e) {
+			e.printStackTrace();
+			System.out.println("Greska u pretvaranju id-a!");
+			return;
+		}
+		
+		Artikal pomArt = new Artikal();
+		pomArt.setId(idPom);
+		
+		k.getArtikli().put(pomArt.getId(), pomArt);
+		
+		for(File f : artikalList) {
+			if(f.getName().contains("image")){
+				pomArt.setSlika(f.getPath());
+				continue;
+			}
+			
+			if(f.getName().contains("details")){
+				ucitajDetaljeArtikla(id,pomArt.getId(),f);
+				continue;
+			}
+		}
+	}
+	
+	private void ucitajDetaljeArtikla(Integer idK,Integer idA,File f) {
+		Kompanija kPom = kompanije.get(idK);
+		Artikal aPom = kPom.getArtikli().get(idA);
+		
+		if(kPom == null || aPom == null) {
+			System.out.println("Lose preuzeti parametri!");
+			return;
+		}
+		
+		String[] ucitani = new String[3];
+		int brojac = 0;
+		double pomBrD = -1;
+		
+		try {
+			FileInputStream fstream = new FileInputStream(f.getPath());
+			BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+			String strLine;
+			
+			while ((strLine = br.readLine()) != null && brojac < 4)   {
+			  strLine = strLine.trim();
+			  ucitani[brojac] = strLine;
+			  ++brojac;
+			}
+			
+			br.close();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println(ucitani[0] + " " + ucitani[1] + " " + ucitani[2]);
+		
+		aPom.setNaziv(ucitani[0]);
+		
+		try {
+			System.out.println("Pokusavam da parsiram: " + ucitani[1]);
+			pomBrD = Double.parseDouble(ucitani[1]);
+		}catch(Exception e) {
+			e.printStackTrace();
+			System.out.println("Neuspela konverzija cene!");
+		}
+		
+		aPom.setCena(pomBrD);
+		aPom.setTip(pronadjiTip(ucitani[2]));
 		
 	}
 	
-	private void ucitajArtikal(Integer id,File f) {}
+	private Tip pronadjiTip(String tip){
+		
+		if(tip.equals("HRANA"))
+			return Tip.HRANA;
+		if(tip.equals("PICE"))
+			return Tip.PICE;
+		
+		return null;
+	}
+	
+	public void ispisiBazu() {
+		for(Kompanija k : kompanije.values()) {
+			System.out.println("\nKOMPANIJA");
+			System.out.println(k.getNaziv());
+			System.out.println(k.getAdresa().toString());
+			System.out.println(k.getEmail());
+			System.out.println(k.getId());
+			System.out.println(k.getPopularnost().toString());
+			System.out.println(k.getSlika());
+			System.out.println("ARTIKLI");
+			for(Artikal a : k.getArtikli().values()) {
+				System.out.println(a.getNaziv());
+				System.out.println(a.getCena());
+				System.out.println(a.getSlika());
+				System.out.println(a.getId());
+				System.out.println(a.getTip());
+			}
+			System.out.println("/ARTIKLI");
+			System.out.println("/KOMPANIJA\n");
+			
+		}
+	}
 
 	public String getPutanja() {
 		return putanja;

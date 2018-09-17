@@ -13,6 +13,10 @@ public class Adresa {
 		this.ulica = ulica;
 		this.broj = broj;
 	}
+	@Override
+	public String toString() { 
+	    return ulica + " " + broj +", " + mesto;
+	} 
 
 	public String getMesto() {
 		return mesto;
