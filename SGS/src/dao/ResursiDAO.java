@@ -1,73 +1,103 @@
 package dao;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
+import java.io.File;
 import java.util.HashMap;
 
 import beans.Kompanija;
-@SuppressWarnings (value="unchecked")
-
 
 public class ResursiDAO {
 	
 	private HashMap<Integer,Kompanija> kompanije;
 	private String putanja = "D:\\SGS\\";
-	private String imeFajla = "kljucevi.txt";
 	
-	public ResursiDAO() {}
+	public ResursiDAO() {
+		kompanije = new HashMap<Integer,Kompanija>();
+		ucitajResurse();
+	}
 	
-	void snimiListuID() {
+	private void ucitajResurse() {
 		
-		ArrayList<Integer> kljucevi = new ArrayList<Integer>(kompanije.keySet());
+		File baza = new File(putanja);
+		if(!baza.exists()) {
+			System.out.println("Baza nije pronadjena!");
+			return;
+		}else if(baza.exists() && !baza.isDirectory()) {
+			System.out.println("Baza nije direktorijum!");
+			return;
+		}
 		
-		try{
-	         FileOutputStream fos= new FileOutputStream(putanja+imeFajla);
-	         ObjectOutputStream oos= new ObjectOutputStream(fos);
-	         oos.writeObject(kljucevi);
-	         oos.close();
-	         fos.close();
-	       }catch(IOException ioe){
-	         ioe.printStackTrace();
-	       }
+		File[] kompanijeLista = baza.listFiles();
+		
+		for(File f : kompanijeLista) {
+			if(!f.isDirectory()) {
+				System.out.println("Kompanija " + f.getName() + " nije dobro uskladistena!");
+				continue;
+			}
+			
+			ucitajKompaniju(f);
+		}
+	}
+	
+	private void ucitajKompaniju(File fKompanija) {
+		Kompanija pomKomp = new Kompanija();
+		String sID = fKompanija.getName();
+		Integer id;
+		
+		try {
+			id = Integer.parseInt(sID);
+		}catch(Exception e) {
+			e.printStackTrace();
+			System.out.println("Greska u pretvaranju id-a!");
+			return;
+		}
+		
+		pomKomp.setId(id);
+		
+		File[] listaArtikala = fKompanija.listFiles();
+		
+		for(File f : listaArtikala) {
+			
+			if(f.getName().contains("image")){
+				pomKomp.setSlika(f.getPath());
+				continue;
+			}
+			
+			if(f.getName().contains("details")){
+				ucitajDetaljeKompanije(pomKomp.getId(),f);
+				continue;
+			}
+			
+			if(!f.isDirectory()) {
+				System.out.println("Artikal " + f.getName() + "nije dobro uskladisten!");
+				continue;
+			}
+			
+			ucitajArtikal(pomKomp.getId(),f);
+			
+			
+		}
+	}
+	
+	private void ucitajDetaljeKompanije(Integer id,File f) {
+		//UCITATI DETALJE 
+	}
+	
+	private void ucitajArtikal(Integer id,File f) {}
 
+	public String getPutanja() {
+		return putanja;
 	}
-	
-	void ucitajLstuID() {
-		
-		ArrayList<Integer> kljucevi = null;
-		
-		try
-        {
-            FileInputStream fis = new FileInputStream(putanja+imeFajla);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            kljucevi = (ArrayList<Integer>) ois.readObject();
-            ois.close();
-            fis.close();
-         }catch(IOException ioe){
-             ioe.printStackTrace();
-             return;
-          }catch(ClassNotFoundException c){
-             System.out.println("Class not found");
-             c.printStackTrace();
-             return;
-          }
-		
-		if(kljucevi!=null) {
-			ucitajResurse(kljucevi);
-		}else {
-			System.out.println("Greska u citanju fajla!");
-		}
+
+	public void setPutanja(String putanja) {
+		this.putanja = putanja;
 	}
-	
-	void ucitajResurse(ArrayList<Integer> lista) {
-		for(Integer i : lista) {
-			//TREBA UCITATI POSEBNO SVAKI FOLDER KOMPANIJE, KAO I SADRZAJ UNUTAR SVAKOG
-			//SAM
-		}
+
+	public HashMap<Integer, Kompanija> getKompanije() {
+		return kompanije;
+	}
+
+	public void setKompanije(HashMap<Integer, Kompanija> kompanije) {
+		this.kompanije = kompanije;
 	}
 
 }

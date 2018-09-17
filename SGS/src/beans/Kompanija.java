@@ -1,5 +1,6 @@
 package beans;
 
+import java.awt.Image;
 import java.util.HashMap;
 
 public class Kompanija {
