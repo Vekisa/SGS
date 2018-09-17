@@ -80,6 +80,8 @@ public class ResursiDAO {
 	
 	private void ucitajDetaljeKompanije(Integer id,File f) {
 		//UCITATI DETALJE 
+		
+		
 	}
 	
 	private void ucitajArtikal(Integer id,File f) {}
