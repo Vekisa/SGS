@@ -31,11 +31,31 @@ import beans.Popularnost;
 public class ResursiDAO {
 	
 	private HashMap<Integer,Kompanija> kompanije;
-	private String putanja = "D:\\SGS\\";
+	private String putanja;
 	
-	public ResursiDAO() {
+	public ResursiDAO(String path) {
 		kompanije = new HashMap<Integer,Kompanija>();
+		ucitajPutanju(path);
 		ucitajResurse();
+	}
+	
+	private void ucitajPutanju(String path) {
+		File f = new File(path);
+		if(!f.exists()) {
+			System.out.println("Fajl sa putanjom nije pronadjen!");
+			return;
+		}
+		
+		try {
+			FileInputStream fstream = new FileInputStream(path);
+			BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+			String strLine = br.readLine();
+			System.out.println("PUTANJA: " + strLine);
+			putanja = strLine;
+			br.close();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void ucitajResurse() {

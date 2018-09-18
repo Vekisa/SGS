@@ -6,6 +6,7 @@ $(document).on("click","#btn",function(){
 		url: "rest/osnovniServis/proba?text="+text,
 		success:function(data){
 			alert("POSLAO!");
+			
 		}
 	});
 });
